@@ -20,6 +20,7 @@ suite('Extension Test Suite', () => {
     return getExtension('haskell.haskell')
       ?.activate()
       .then(() => {
+        console.log('Extension activated');
         assert.ok(true);
       });
   });
