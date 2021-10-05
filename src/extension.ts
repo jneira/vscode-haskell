@@ -62,14 +62,22 @@ class ReadableOutputChannel implements OutputChannel {
     this.original.dispose();
   }
 }
+
+export class Api {
+  public readonly outputChannels: Map<string, ReadableOutputChannel>;
+
+  constructor(outputChannels: Map<string, ReadableOutputChannel>) {
+    this.outputChannels = outputChannels;
+  }
+}
+
 // The current map of documents & folders to language servers.
 // It may be null to indicate that we are in the process of launching a server,
 // in which case don't try to launch another one for that uri
 const clients: Map<string, LanguageClient | null> = new Map();
-export const outputChannels: Map<string, ReadableOutputChannel> = new Map();
-
+const outputChannels: Map<string, ReadableOutputChannel> = new Map();
 // This is the entrypoint to our extension
-export async function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext): Promise<Api> {
   // (Possibly) launch the language server every time a document is opened, so
   // it works across multiple workspace folders. Eventually, haskell-lsp should
   // just support
@@ -132,6 +140,8 @@ export async function activate(context: ExtensionContext) {
 
   const openOnHackageDisposable = DocsBrowser.registerDocsOpenOnHackage();
   context.subscriptions.push(openOnHackageDisposable);
+
+  return new Api(outputChannels);
 }
 
 function findManualExecutable(logger: Logger, uri: Uri, folder?: WorkspaceFolder): string | null {
